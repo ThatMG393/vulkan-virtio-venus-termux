@@ -17,7 +17,6 @@ generate_crossfile() {
 		echo """
 [constants]
 prefix = '/data/data/com.termux/files/usr/'
-home = '/data/data/com.termux/files/home/'
 
 toolchain_arch = 'arm-linux-androideabi'
 toolchain_path = prefix + 'bin/' + toolchain_arch
@@ -83,14 +82,14 @@ install_deps() {
 		vulkan-headers git cmake vulkan-loader-generic \
 		vulkan-tools libandroid-support libandroid-shmem \
 		libdrm libepoxy libglvnd libx11 xorgproto libxrandr \
-		libc++ libxshmfence libxcb zlib zstd
+		libc++ libxshmfence libxcb zlib zstd ninja
 }
 
 main() {
 	mkdir -p $MAIN_DIR_PATH
 	cd $MAIN_DIR_PATH
 	
-	# install_deps
+	install_deps
 	generate_crossfile
 	
 	: '
@@ -103,7 +102,7 @@ main() {
 	else echo "'mesa-mirror' already exists, no need to clone." ;:; fi
 	cd mesa-mirror
 	
-	# git apply "$MAIN_DIR_PATH/mesa-virtio.patch"
+	git apply "$MAIN_DIR_PATH/mesa-virtio.patch"
 	
 	if [ -d "build" ]; then
 		echo "No need to setup meson as 'build' already exists."
@@ -134,7 +133,7 @@ main() {
 	else echo "'virglrenderer' already exists, no need to clone." ;:; fi
 	cd virglrenderer
 	
-	# git apply "$MAIN_DIR_PATH/virgl-venus.patch"
+	git apply "$MAIN_DIR_PATH/virgl-venus.patch"
 	
 	if [ -d "build" ]; then
 		echo "No need to setup meson as 'build' already exists."
