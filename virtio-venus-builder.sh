@@ -18,25 +18,25 @@ generate_crossfile() {
 	if [[ $ARCH = "armeabi-v7a" ]]; then
 		echo """
 [constants]
-prefix = '$PREFIX/'
+prefix = '$PREFIX'
 
 toolchain_arch = 'arm-linux-androideabi'
-toolchain_path = prefix + 'bin/' + toolchain_arch
+toolchain_path = prefix + '/bin/' + toolchain_arch
 
 [binaries]
 ar = toolchain_path + '-ar'
-c = [prefix + 'bin/ccache', toolchain_path + '-clang']
-cpp = [prefix + 'bin/ccache', toolchain_path + '-clang++']
+c = [prefix + '/bin/ccache', toolchain_path + '-clang']
+cpp = [prefix + '/bin/ccache', toolchain_path + '-clang++']
 c_ld = toolchain_path + '-ld'
 cpp_ld = toolchain_path + '-ld'
 strip = toolchain_path + '-strip'
-pkg-config = prefix + 'bin/pkg-config'
+pkg-config = prefix + '/bin/pkg-config'
 
 [built-in options]
 c_args = ['-Wno-unused-parameter', '-O3', '--target=armv7a-linux-androideabi30', '-I$AOSP_INCLUDE']
-c_link_args = ['-L/system/lib', '-landroid', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
+c_link_args = ['-L/system/lib', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
 cpp_args = ['-O3', '--target=armv7a-linux-androideabi30', '-I$AOSP_INCLUDE']
-cpp_link_args = ['-L/system/lib', '-landroid', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
+cpp_link_args = ['-L/system/lib', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
 
 [host_machine]
 system = 'linux'
@@ -47,25 +47,25 @@ endian = 'little'
 	else
 		echo """
 [constants]
-prefix = '$PREFIX/'
+prefix = '$PREFIX'
 
 toolchain_arch = 'aarch64-linux-androideabi'
-toolchain_path = prefix + toolchain_arch
+toolchain_path = prefix + '/bin/' + toolchain_arch
 
 [binaries]
 ar = toolchain_path + '-ar'
-c = [prefix + 'bin/ccache', toolchain_path + '-clang']
-cpp = [prefix + 'bin/ccache', toolchain_path + '-clang++']
+c = [prefix + '/bin/ccache', toolchain_path + '-clang']
+cpp = [prefix + '/bin/ccache', toolchain_path + '-clang++']
 c_ld = toolchain_path + '-ld'
 cpp_ld = toolchain_path + '-ld'
 strip = toolchain_path + '-strip'
-pkg-config = prefix + 'bin/pkg-config'
+pkg-config = prefix + '/bin/pkg-config'
 
 [built-in options]
 c_args = ['-Wno-unused-parameter', '-O3', '--target=aarch64-linux-androideabi30', '-I$AOSP_INCLUDE']
-c_link_args = ['-L/system/lib', '-landroid', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
+c_link_args = ['-L/system/lib', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
 cpp_args = ['-O3', '--target=aarch64-linux-androideabi30', '-I$AOSP_INCLUDE']
-cpp_link_args = ['-L/system/lib', '-landroid', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
+cpp_link_args = ['-L/system/lib', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
 
 [host_machine]
 system = 'linux'
@@ -103,7 +103,7 @@ main() {
 	
 	cd mesa-mirror
 	
-	git apply --reject "$PATCHES_DIR/mesa-virtio.patch" || echo "Seems like patching failed or it is already applied, skipping..."
+	git apply "$PATCHES_DIR/mesa-virtio.patch" || echo "Seems like patching failed or it is already applied, skipping..."
 	
 	if [ -d "build" ]; then
 		echo "No need to setup meson as the build directory already exists."
