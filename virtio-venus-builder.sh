@@ -18,7 +18,7 @@ generate_crossfile() {
 	if [[ $ARCH = "armeabi-v7a" ]]; then
 		echo """
 [constants]
-prefix = '$PREFIX'
+prefix = '$PREFIX/'
 
 toolchain_arch = 'arm-linux-androideabi'
 toolchain_path = prefix + 'bin/' + toolchain_arch
@@ -47,7 +47,7 @@ endian = 'little'
 	else
 		echo """
 [constants]
-prefix = '$PREFIX'
+prefix = '$PREFIX/'
 
 toolchain_arch = 'aarch64-linux-androideabi'
 toolchain_path = prefix + toolchain_arch
