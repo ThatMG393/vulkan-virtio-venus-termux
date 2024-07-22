@@ -1,6 +1,15 @@
 # vulkan-virtio-venus-termux
 It basically compiles everything automatically for you.
 
+# How to use
+0. Start Termux-X11:
+   - run -> `termux-x11`
+1. Start VirGL:
+   - run -> `LD_PRELOAD=/system/lib(64)/libvulkan.so virgl_test_server --no-virgl --venus`
+2. Enjoy!
+   - run -> `VN_DEBUG=vtest appname`
+  
+> If on Adreno append (or set) `ADRENO_GPU=1` before `LD_PRELOAD` before starting VirGL
 
 # Credits
 - [`@xMem`](https://github.com/xMeM)
