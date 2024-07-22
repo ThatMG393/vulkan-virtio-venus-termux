@@ -1,9 +1,11 @@
 set -e
 
-# MAIN_DIR_PATH="$HOME/virtio_virgl"
-MAIN_DIR_PATH=$( git rev-parse --show-toplevel )
-CROSSFILE="$MAIN_DIR_PATH/crossfile.ini"
-AOSP_INCLUDE="$MAIN_DIR_PATH/aosp/include"
+MAIN_DIR=$( git rev-parse --show-toplevel )
+CLONE_DIR="$MAIN_DIR/repo"
+PATCHES_DIR="$MAIN_DIR/patches"
+
+CROSSFILE="$MAIN_DIR/crossfile.ini"
+AOSP_INCLUDE="$MAIN_DIR/aosp/include"
 
 case $(uname -m) in
     arm64 | aarch64) ARCH="armeabi-v8a" ;;
@@ -16,7 +18,7 @@ generate_crossfile() {
 	if [[ $ARCH = "armeabi-v7a" ]]; then
 		echo """
 [constants]
-prefix = '/data/data/com.termux/files/usr/'
+prefix = '$PREFIX'
 
 toolchain_arch = 'arm-linux-androideabi'
 toolchain_path = prefix + 'bin/' + toolchain_arch
@@ -32,9 +34,9 @@ pkg-config = prefix + 'bin/pkg-config'
 
 [built-in options]
 c_args = ['-Wno-unused-parameter', '-O3', '--target=armv7a-linux-androideabi30', '-I$AOSP_INCLUDE']
-c_link_args = ['-L/system/lib', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
+c_link_args = ['-L/system/lib', '-landroid', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
 cpp_args = ['-O3', '--target=armv7a-linux-androideabi30', '-I$AOSP_INCLUDE']
-cpp_link_args = ['-L/system/lib', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
+cpp_link_args = ['-L/system/lib', '-landroid', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
 
 [host_machine]
 system = 'linux'
@@ -45,7 +47,7 @@ endian = 'little'
 	else
 		echo """
 [constants]
-prefix = '/data/data/com.termux/files/usr/bin/'
+prefix = '$PREFIX'
 
 toolchain_arch = 'aarch64-linux-androideabi'
 toolchain_path = prefix + toolchain_arch
@@ -61,9 +63,9 @@ pkg-config = prefix + 'bin/pkg-config'
 
 [built-in options]
 c_args = ['-Wno-unused-parameter', '-O3', '--target=aarch64-linux-androideabi30', '-I$AOSP_INCLUDE']
-c_link_args = ['-L/system/lib', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
+c_link_args = ['-L/system/lib', '-landroid', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
 cpp_args = ['-O3', '--target=aarch64-linux-androideabi30', '-I$AOSP_INCLUDE']
-cpp_link_args = ['-L/system/lib', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
+cpp_link_args = ['-L/system/lib', '-landroid', '-landroid-shmem', '-llog', '-lcutils', '-lsync']
 
 [host_machine]
 system = 'linux'
@@ -86,21 +88,25 @@ install_deps() {
 }
 
 main() {
-	mkdir -p $MAIN_DIR_PATH
-	cd $MAIN_DIR_PATH
+	cd $MAIN_DIR
+	
+	if [ ! -d "$CLONE_DIR" ]; then mkdir -p $CLONE_DIR ;:; fi
 	
 	install_deps
 	generate_crossfile
 	
-	if [ ! -d "$MAIN_DIR_PATH/mesa-mirror" ]; then
+	cd $CLONE_DIR
+	
+	if [ ! -d "mesa-mirror" ]; then
 		clone_d1 "https://github.com/chaotic-cx/mesa-mirror.git"
 	else echo "'mesa-mirror' already exists, no need to clone." ;:; fi
+	
 	cd mesa-mirror
 	
-	git apply "$MAIN_DIR_PATH/mesa-virtio.patch"
+	git apply --reject "$PATCHES_DIR/mesa-virtio.patch" || echo "Seems like patching failed or it is already applied, skipping..."
 	
 	if [ -d "build" ]; then
-		echo "No need to setup meson as 'build' already exists."
+		echo "No need to setup meson as the build directory already exists."
 	else
 		meson setup "build" \
 			--cross-file=$CROSSFILE \
@@ -116,22 +122,23 @@ main() {
 			-Dshared-llvm=disabled \
 			-Dperfetto=false \
 			-Dxmlconfig=disabled \
-			-Dbuildtype=release
+			-Dbuildtype=debug
 	fi
 		
 	ninja -C "build" install -j$(nproc)
 	
-	cd $MAIN_DIR_PATH
+	cd $CLONE_DIR
 	
-	if [ ! -d "$MAIN_DIR_PATH/virglrenderer" ]; then
+	if [ ! -d "virglrenderer" ]; then
 	clone_d1 "https://gitlab.freedesktop.org/virgl/virglrenderer.git"
 	else echo "'virglrenderer' already exists, no need to clone." ;:; fi
+	
 	cd virglrenderer
 	
-	git apply "$MAIN_DIR_PATH/virgl-venus.patch"
+	git apply "$PATCHES_DIR/virgl-venus.patch" || echo "Seems like patching failed or it is already applied, skipping..."
 	
 	if [ -d "build" ]; then
-		echo "No need to setup meson as 'build' already exists."
+		echo "No need to setup meson as the build directory already exists."
 	else
 		meson setup "build" \
 			--cross-file=$CROSSFILE \
@@ -144,7 +151,7 @@ main() {
 	
 	ninja -C "build" install -j$(nproc)
 	
-	cd $HOME
+	cd $MAIN_DIR
 }
 
 echo "Building Mesa with 'virtio' and VirGL with 'venus'..."

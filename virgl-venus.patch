@@ -6,8 +6,8 @@ index 9e466f8..e0f7d4a 100644
      * vkr_physical_device_init_memory_properties as well.
      */
  
-+#if defined (__ANDROID__)
-+   if (getenv("ANDROID_VENUS")) {
++#ifdef __ANDROID__
++   if (getenv("ADRENO_GPU")) {
 +      VkExternalMemoryBufferCreateInfo *handle_info = vkr_find_struct(
 +         args->pCreateInfo->pNext, VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO);
 +      if (handle_info) {
@@ -29,8 +29,8 @@ index cd62fe8..decf5b0 100644
        if (physical_dev->KHR_external_fence_fd)
           exts[ext_count++] = "VK_KHR_external_fence_fd";
  
-+#if defined (__ANDROID__)
-+      if (getenv("ANDROID_VENUS")) {
++#ifdef __ANDROID__
++      if (getenv("ADRENO_GPU")) {
 +         for (unsigned i = 0u; i < ext_count; i++) {
 +            if (!strcmp(exts[i], "VK_EXT_external_memory_dma_buf"))
 +               exts[i] = "VK_ANDROID_external_memory_android_hardware_buffer";
@@ -51,7 +51,7 @@ index 34e72a5..fb014bd 100644
  
  #else
  
-+#if defined (__ANDROID__)
++#ifdef __ANDROID__
 +#include <dlfcn.h>
 +#include <android/hardware_buffer.h>
 +#include <vulkan/vulkan_android.h>
@@ -84,7 +84,7 @@ index 34e72a5..fb014bd 100644
 +};
 +#endif
 +
-+#if defined (__ANDROID__)
++#ifdef __ANDROID__
 +static int
 +vkr_gbm_bo_get_fd(void *gbm_bo)
 +{
@@ -113,7 +113,7 @@ index 34e72a5..fb014bd 100644
  }
 +#endif
 +
-+#if defined (__ANDROID__)
++#ifdef __ANDROID__
 +static void
 +vkr_gbm_bo_destroy(void *gbm_bo)
 +{
@@ -135,7 +135,7 @@ index 34e72a5..fb014bd 100644
  }
 +#endif
  
-+#if defined (__ANDROID__)
++#ifdef __ANDROID__
 +static VkResult
 +vkr_get_fd_info_from_allocation_info(UNUSED struct vkr_physical_device *physical_dev,
 +                                     const VkMemoryAllocateInfo *alloc_info,
@@ -207,8 +207,8 @@ index 34e72a5..fb014bd 100644
           valid_fd_types |= 1 << VIRGL_RESOURCE_FD_DMABUF;
     }
  
-+#if defined (__ANDROID__)
-+   if (getenv("ANDROID_VENUS") && export_info) {
++#ifdef __ANDROID__
++   if (getenv("ADRENO_GPU") && export_info) {
 +      VkBaseInStructure *prev_of_export_info =
 +         vkr_find_prev_struct(alloc_info, VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO);
 +
@@ -235,8 +235,8 @@ index 7d9aad0..46f4d78 100644
      * situation because the app does not consider the memory external.
      */
  
-+#if defined (__ANDROID__)
-+   if (getenv("ANDROID_VENUS")) {
++#ifdef __ANDROID__
++   if (getenv("ADRENO_GPU")) {
 +      VkExternalMemoryImageCreateInfo *handle_info = vkr_find_struct(
 +         args->pCreateInfo->pNext, VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO);
 +      if (handle_info) {
@@ -256,8 +256,8 @@ index 7d9aad0..46f4d78 100644
     struct vkr_device *dev = vkr_device_from_handle(args->device);
     struct vn_device_proc_table *vk = &dev->proc_table;
  
-+#if defined (__ANDROID__)
-+   if (getenv("ANDROID_VENUS")) {
++#ifdef __ANDROID__
++   if (getenv("ADRENO_GPU")) {
 +      args->pProperties->drmFormatModifier = 0 /* DRM_FORMAT_MOD_LINEAR */ ;
 +      args->ret = VK_SUCCESS;
 +      return;
@@ -287,8 +287,8 @@ index e6670f2..2ddebd3 100644
        }
     }
  
-+#if defined (__ANDROID__)
-+   if (getenv("ANDROID_VENUS")) {
++#ifdef __ANDROID__
++   if (getenv("ADRENO_GPU")) {
 +      physical_dev->EXT_external_memory_dma_buf = true;
 +
 +      if (advertised_count + 2 > count)
@@ -310,10 +310,10 @@ index e6670f2..2ddebd3 100644
     UNUSED struct vn_dispatch_context *dispatch,
     struct vn_command_vkGetPhysicalDeviceFormatProperties2 *args)
  {
-+#if defined (__ANDROID__)
++#ifdef __ANDROID__
 +   VkDrmFormatModifierPropertiesListEXT *mod_list = vkr_find_struct(
 +      args->pFormatProperties, VK_STRUCTURE_TYPE_DRM_FORMAT_MODIFIER_PROPERTIES_LIST_EXT);
-+   if (getenv("ANDROID_VENUS") && mod_list) {
++   if (getenv("ADRENO_GPU") && mod_list) {
 +      VkBaseInStructure *prev_of_mod_list =
 +         vkr_find_prev_struct(args->pFormatProperties,
 +                              VK_STRUCTURE_TYPE_DRM_FORMAT_MODIFIER_PROPERTIES_LIST_EXT);
@@ -334,8 +334,8 @@ index e6670f2..2ddebd3 100644
     vkGetPhysicalDeviceFormatProperties2(args->physicalDevice, args->format,
                                          args->pFormatProperties);
 +
-+#if defined (__ANDROID__)
-+   if (getenv("ANDROID_VENUS") && mod_list) {
++#ifdef __ANDROID__
++   if (getenv("ADRENO_GPU") && mod_list) {
 +      mod_list->pNext = args->pFormatProperties->pNext;
 +      args->pFormatProperties->pNext = mod_list;
 +   }
@@ -347,8 +347,8 @@ index e6670f2..2ddebd3 100644
     UNUSED struct vn_dispatch_context *dispatch,
     struct vn_command_vkGetPhysicalDeviceImageFormatProperties2 *args)
  {
-+#if defined (__ANDROID__)
-+   if (getenv("ANDROID_VENUS")) {
++#ifdef __ANDROID__
++   if (getenv("ADRENO_GPU")) {
 +      VkPhysicalDeviceImageDrmFormatModifierInfoEXT *mod_info = vkr_find_struct(
 +         args->pImageFormatInfo->pNext,
 +         VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_DRM_FORMAT_MODIFIER_INFO_EXT);
