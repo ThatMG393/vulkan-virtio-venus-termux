@@ -92,11 +92,6 @@ main() {
 	install_deps
 	generate_crossfile
 	
-	: '
-	if [ ! -f "$MAIN_DIR_PATH/wsi-no-pthread_cancel.patch" ]; then
-		wget "https://raw.githubusercontent.com/xMeM/termux-packages/23cf5ca365a1c3feb9960ae6490165dabcc9112b/packages/mesa-vulkan-icd-freedreno-dri3/wsi-no-pthread_cancel.patch"
-	fi '
-	
 	if [ ! -d "$MAIN_DIR_PATH/mesa-mirror" ]; then
 		clone_d1 "https://github.com/chaotic-cx/mesa-mirror.git"
 	else echo "'mesa-mirror' already exists, no need to clone." ;:; fi
